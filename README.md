@@ -1,7 +1,7 @@
 # Inkwell — Blog Publishing Platform
 
 A production-style full-stack blog publishing platform built with Next.js (App Router),
-TypeScript, Tailwind CSS, Prisma, and **Microsoft SQL Server**.
+TypeScript, Tailwind CSS, Prisma, and **PostgreSQL**.
 
 Visitors browse published articles. Authors write, save drafts, and submit for review.
 Admins approve or reject submissions before anything goes live. A submitted blog never
@@ -11,18 +11,14 @@ appears publicly until an admin approves it.
 
 - **Frontend:** Next.js 15 (App Router), React 19, TypeScript, Tailwind CSS
 - **Backend:** Next.js Route Handlers, Prisma ORM
-- **Database:** Microsoft SQL Server
+- **Database:** Hosted PostgreSQL (Neon, Supabase, or equivalent)
 - **Auth:** HTTP-only JWT session cookie (`jose`), bcrypt password hashing
 - **Validation:** Zod
 
 ## 1. Prerequisites
 
 - Node.js 20+
-- A running SQL Server instance you can connect to. Any of these work:
-  - SQL Server Express / Developer edition (local install)
-  - SQL Server via Docker: `docker run -e "ACCEPT_EULA=Y" -e "MSSQL_SA_PASSWORD=YourStrong@Passw0rd" -p 1433:1433 -d mcr.microsoft.com/mssql/server:2022-latest`
-  - Azure SQL Database
-  - LocalDB (Windows)
+- A hosted PostgreSQL database you can connect to, such as Neon or Supabase
 
 ## 2. Setup
 
@@ -30,14 +26,14 @@ appears publicly until an admin approves it.
 # 1. Install dependencies
 npm install
 
-# 2. Copy the environment template and fill in your SQL Server connection string
+# 2. Copy the environment template and fill in your PostgreSQL connection string
 cp .env.example .env
 ```
 
 Edit `.env`:
 
 ```
-DATABASE_URL="sqlserver://localhost:1433;database=blogplatform;user=sa;password=YourStrong@Passw0rd;trustServerCertificate=true"
+DATABASE_URL="postgresql://USER:PASSWORD@HOST/DATABASE?sslmode=require"
 JWT_SECRET="a-long-random-string"
 NEXT_PUBLIC_SITE_URL="http://localhost:3000"
 ```
@@ -48,15 +44,16 @@ Generate a strong `JWT_SECRET`, e.g.:
 node -e "console.log(require('crypto').randomBytes(48).toString('hex'))"
 ```
 
-Make sure the database named in your connection string exists (create it once via
-`sqlcmd`, SSMS, or Azure Data Studio — Prisma migrate does not create the database itself
-on SQL Server).
+Create the hosted database first, then use its connection string in `.env`.
 
 ## 3. Database: migrate and seed
 
 ```bash
-# Create tables from the Prisma schema
+# Local development: create and apply a migration
 npx prisma migrate dev --name init
+
+# Vercel/production: apply committed migrations
+npm run prisma:migrate:deploy
 
 # Seed roles, an admin account, 6 authors, 8 categories, and 50 sample blogs
 npm run prisma:seed
@@ -102,7 +99,7 @@ app/                  Routes (App Router) — public, /author, /admin, /api
 components/           Reusable UI components
 lib/                  Prisma client, auth helpers, utilities
 prisma/
-  schema.prisma        Data model (SQL Server)
+  schema.prisma        Data model (PostgreSQL)
   seed.ts               Seed script (roles, admin, authors, 50 blogs)
 types/                 Shared TypeScript types
 middleware.ts          Route protection for /author and /admin
@@ -144,6 +141,6 @@ Enforced in code:
 - Passwords are hashed with bcrypt (cost 12); sessions are signed JWTs in an
   HTTP-only cookie — never store the JWT in localStorage.
 - All mutating API routes validate input with Zod and check the caller's session/role.
-- Swap `DATABASE_URL` for your production SQL Server / Azure SQL instance and set a
+- Set `DATABASE_URL` to your production PostgreSQL database and set a
   fresh `JWT_SECRET` before deploying — do not reuse the seed credentials.
 - Consider adding rate limiting on `/api/auth/*` before going live publicly.
