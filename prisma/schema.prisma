@@ -1,0 +1,182 @@
+// ============================================================
+// Blog Publishing Platform — Prisma Schema
+// ============================================================
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// ------------------------------------------------------------
+// ROLES & USERS
+// ------------------------------------------------------------
+
+model Role {
+  id    Int    @id @default(autoincrement())
+  name  String @unique
+  users User[]
+
+  @@map("Roles")
+}
+
+model User {
+  id           Int      @id @default(autoincrement())
+  name         String
+  email        String   @unique
+  passwordHash String
+  roleId       Int
+  role         Role     @relation(fields: [roleId], references: [id])
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  author Author?
+
+  @@index([email])
+  @@map("Users")
+}
+
+// ------------------------------------------------------------
+// AUTHORS
+// ------------------------------------------------------------
+
+model Author {
+  id        Int      @id @default(autoincrement())
+  userId    Int      @unique
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  bio       String?
+  avatarUrl String?
+  twitter   String?
+  website   String?
+  createdAt DateTime @default(now())
+
+  blogs Blog[]
+
+  @@map("Authors")
+}
+
+// ------------------------------------------------------------
+// CATEGORIES & TAGS
+// ------------------------------------------------------------
+
+model Category {
+  id          Int      @id @default(autoincrement())
+  name        String   @unique
+  slug        String   @unique
+  description String?
+  createdAt   DateTime @default(now())
+
+  blogs Blog[]
+
+  @@map("Categories")
+}
+
+model Tag {
+  id   Int    @id @default(autoincrement())
+  name String @unique
+  slug String @unique
+
+  blogTags BlogTag[]
+
+  @@map("Tags")
+}
+
+model BlogTag {
+  blogId Int
+  tagId  Int
+  blog   Blog @relation(fields: [blogId], references: [id], onDelete: Cascade)
+  tag    Tag  @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([blogId, tagId])
+  @@map("BlogTags")
+}
+
+// ------------------------------------------------------------
+// BLOG STATUS (lookup table, mirrored by the status string on Blog)
+// ------------------------------------------------------------
+
+model BlogStatusLookup {
+  id    Int    @id @default(autoincrement())
+  code  String @unique
+  label String
+
+  @@map("BlogStatuses")
+}
+
+// ------------------------------------------------------------
+// BLOGS
+// ------------------------------------------------------------
+
+model Blog {
+  id            Int        @id @default(autoincrement())
+  title         String
+  slug          String     @unique
+  description   String
+  content       String
+  featuredImage String?
+  references    String?
+  readingTime   Int        @default(1)
+  status        String     @default("DRAFT")
+
+  authorId   Int
+  author     Author   @relation(fields: [authorId], references: [id])
+  categoryId Int
+  category   Category @relation(fields: [categoryId], references: [id])
+
+  viewCount Int @default(0)
+
+  submittedAt   DateTime?
+  reviewedAt    DateTime?
+  publishedAt   DateTime?
+  rejectReason  String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  tags        BlogTag[]
+  submissions BlogSubmission[]
+  media       Media[]
+
+  @@index([status])
+  @@index([slug])
+  @@index([categoryId])
+  @@index([authorId])
+  @@map("Blogs")
+}
+
+// ------------------------------------------------------------
+// SUBMISSIONS (audit trail of the review workflow)
+// ------------------------------------------------------------
+
+model BlogSubmission {
+  id         Int                @id @default(autoincrement())
+  blogId     Int
+  blog       Blog               @relation(fields: [blogId], references: [id], onDelete: Cascade)
+  decision   String             @default("PENDING")
+  note       String?
+  reviewedBy Int?
+  submittedAt DateTime          @default(now())
+  reviewedAt  DateTime?
+
+  @@index([blogId])
+  @@map("BlogSubmissions")
+}
+
+// ------------------------------------------------------------
+// MEDIA
+// ------------------------------------------------------------
+
+model Media {
+  id        Int      @id @default(autoincrement())
+  blogId    Int?
+  blog      Blog?    @relation(fields: [blogId], references: [id], onDelete: SetNull)
+  url       String
+  altText   String?
+  createdAt DateTime @default(now())
+
+  @@map("Media")
+}
