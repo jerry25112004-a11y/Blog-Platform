@@ -75,7 +75,7 @@ const CATEGORY_IMAGE_THEMES: Record<string, { background: string; foreground: st
 function buildPlaceholderImage(categoryName: string, title: string) {
   const theme = CATEGORY_IMAGE_THEMES[categoryName] ?? { background: "263238", foreground: "ffffff" };
   const text = encodeURIComponent(title);
-  return `https://placehold.co/1200x800/${theme.background}/${theme.foreground}?text=${text}`;
+  return `https://placehold.co/1200x800/${theme.background}/${theme.foreground}.png?text=${text}`;
 }
 
 function paragraph(topic: string) {
@@ -168,6 +168,16 @@ async function main() {
   const existingCount = await prisma.blog.count();
   if (existingCount >= 50) {
     console.log(`Already have ${existingCount} blogs — skipping blog seed.`);
+    const existingBlogs = await prisma.blog.findMany({
+      select: { id: true, title: true, category: { select: { name: true } } },
+    });
+    for (const blog of existingBlogs) {
+      await prisma.blog.update({
+        where: { id: blog.id },
+        data: { featuredImage: buildPlaceholderImage(blog.category.name, blog.title) },
+      });
+    }
+    console.log(`Updated featured images for ${existingBlogs.length} existing blogs.`);
   } else {
     for (let i = 0; i < 50; i++) {
       const topic = TOPICS[i % TOPICS.length];
