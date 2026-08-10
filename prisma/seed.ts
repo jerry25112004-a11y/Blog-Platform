@@ -61,6 +61,23 @@ const TOPICS = [
   "technical interviews", "cross-functional collaboration", "changelog writing",
 ];
 
+const CATEGORY_IMAGE_THEMES: Record<string, { background: string; foreground: string }> = {
+  Engineering: { background: "1f4d3a", foreground: "f4f1e8" },
+  Design: { background: "b85c42", foreground: "fff8f0" },
+  Product: { background: "315c78", foreground: "f4f1e8" },
+  Career: { background: "8a6a2f", foreground: "fff8f0" },
+  Startups: { background: "7a3e52", foreground: "fff8f0" },
+  "AI & Machine Learning": { background: "3d536b", foreground: "f4f1e8" },
+  Databases: { background: "245b63", foreground: "f4f1e8" },
+  Culture: { background: "684b3c", foreground: "fff8f0" },
+};
+
+function buildPlaceholderImage(categoryName: string, title: string) {
+  const theme = CATEGORY_IMAGE_THEMES[categoryName] ?? { background: "263238", foreground: "ffffff" };
+  const text = encodeURIComponent(title);
+  return `https://placehold.co/1200x800/${theme.background}/${theme.foreground}?text=${text}`;
+}
+
 function paragraph(topic: string) {
   return `<p>When we first started thinking seriously about ${topic}, most of the advice we found online was either too abstract to act on or too specific to someone else's stack to be useful. This piece is an attempt to close that gap — grounded in decisions we actually made, the trade-offs we weighed, and what we'd do differently with what we know now.</p>`;
 }
@@ -177,7 +194,7 @@ async function main() {
           slug,
           description: `A closer look at ${topic} — what worked, what didn't, and what we'd change next time.`,
           content,
-          featuredImage: `https://picsum.photos/seed/inkwell-${i}/1200/800`,
+          featuredImage: buildPlaceholderImage(category.name, title),
           references: i % 4 === 0 ? "https://martinfowler.com\nhttps://sqlperformance.com" : null,
           readingTime: calcReadingTime(content),
           status: status as any,
