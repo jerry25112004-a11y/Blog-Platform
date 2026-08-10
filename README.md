@@ -59,9 +59,9 @@ npm run prisma:migrate:deploy
 npm run prisma:seed
 ```
 
-Seed blogs use branded, category-based `placehold.co` images with the blog title as
-the image text. These are demo placeholders; authors can provide a hosted featured
-image URL when creating or editing a blog.
+Seed blogs use category-based real-photo images from `loremflickr.com`, selected with
+relevant keywords such as `database`, `design`, or `startup`. These are demo images;
+authors can provide a hosted featured image URL when creating or editing a blog.
 
 Seeded logins (printed at the end of the seed script too):
 

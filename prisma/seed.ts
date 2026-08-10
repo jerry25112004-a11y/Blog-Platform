@@ -61,21 +61,21 @@ const TOPICS = [
   "technical interviews", "cross-functional collaboration", "changelog writing",
 ];
 
-const CATEGORY_IMAGE_THEMES: Record<string, { background: string; foreground: string }> = {
-  Engineering: { background: "1f4d3a", foreground: "f4f1e8" },
-  Design: { background: "b85c42", foreground: "fff8f0" },
-  Product: { background: "315c78", foreground: "f4f1e8" },
-  Career: { background: "8a6a2f", foreground: "fff8f0" },
-  Startups: { background: "7a3e52", foreground: "fff8f0" },
-  "AI & Machine Learning": { background: "3d536b", foreground: "f4f1e8" },
-  Databases: { background: "245b63", foreground: "f4f1e8" },
-  Culture: { background: "684b3c", foreground: "fff8f0" },
+const CATEGORY_IMAGE_KEYWORDS: Record<string, string> = {
+  Engineering: "programming,code",
+  Design: "design,uidesign",
+  Product: "product,technology",
+  Career: "office,career",
+  Startups: "startup,entrepreneur",
+  "AI & Machine Learning": "artificialintelligence,robot",
+  Databases: "database,server",
+  Culture: "team,workplace",
 };
 
-function buildPlaceholderImage(categoryName: string, title: string) {
-  const theme = CATEGORY_IMAGE_THEMES[categoryName] ?? { background: "263238", foreground: "ffffff" };
-  const text = encodeURIComponent(title);
-  return `https://placehold.co/1200x800/${theme.background}/${theme.foreground}.png?text=${text}`;
+function buildCategoryImage(categoryName: string, title: string) {
+  const keywords = CATEGORY_IMAGE_KEYWORDS[categoryName] ?? "technology,workplace";
+  const lock = [...title].reduce((hash, character) => ((hash * 31 + character.charCodeAt(0)) >>> 0), 7);
+  return `https://loremflickr.com/1200/800/${keywords}?lock=${lock}`;
 }
 
 function paragraph(topic: string) {
@@ -174,7 +174,7 @@ async function main() {
     for (const blog of existingBlogs) {
       await prisma.blog.update({
         where: { id: blog.id },
-        data: { featuredImage: buildPlaceholderImage(blog.category.name, blog.title) },
+        data: { featuredImage: buildCategoryImage(blog.category.name, blog.title) },
       });
     }
     console.log(`Updated featured images for ${existingBlogs.length} existing blogs.`);
@@ -204,7 +204,7 @@ async function main() {
           slug,
           description: `A closer look at ${topic} — what worked, what didn't, and what we'd change next time.`,
           content,
-          featuredImage: buildPlaceholderImage(category.name, title),
+          featuredImage: buildCategoryImage(category.name, title),
           references: i % 4 === 0 ? "https://martinfowler.com\nhttps://sqlperformance.com" : null,
           readingTime: calcReadingTime(content),
           status: status as any,
