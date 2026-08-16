@@ -1,4 +1,6 @@
+import { redirect } from "next/navigation";
 import { prisma } from "@/lib/db";
+import { getSession } from "@/lib/auth";
 import AdminSidebar from "@/components/AdminSidebar";
 import StatusBadge from "@/components/StatusBadge";
 import Link from "next/link";
@@ -8,6 +10,16 @@ import type { Metadata } from "next";
 export const metadata: Metadata = { title: "Admin Dashboard" };
 
 export default async function AdminDashboardPage() {
+  const session = await getSession();
+
+  if (!session) {
+    redirect("/login?next=/admin/dashboard");
+  }
+
+  if (session.role !== "ADMIN") {
+    redirect("/login?next=/admin/dashboard");
+  }
+
   const [
     totalBlogs, published, pending, rejected,
     users, authors, categories, recentSubmissions,

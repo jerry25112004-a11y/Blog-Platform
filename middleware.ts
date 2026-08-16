@@ -20,11 +20,15 @@ export async function middleware(req: NextRequest) {
   }
 
   if (isAdminRoute && session.role !== "ADMIN") {
-    return NextResponse.redirect(new URL("/", req.url));
+    const loginUrl = new URL("/login", req.url);
+    loginUrl.searchParams.set("next", pathname);
+    return NextResponse.redirect(loginUrl);
   }
 
   if (isAuthorRoute && session.role !== "AUTHOR") {
-    return NextResponse.redirect(new URL("/", req.url));
+    const loginUrl = new URL("/login", req.url);
+    loginUrl.searchParams.set("next", pathname);
+    return NextResponse.redirect(loginUrl);
   }
 
   return NextResponse.next();

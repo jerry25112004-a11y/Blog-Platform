@@ -1,3 +1,4 @@
+import { redirect } from "next/navigation";
 import { prisma } from "@/lib/db";
 import { getSession } from "@/lib/auth";
 import AuthorSidebar from "@/components/AuthorSidebar";
@@ -10,8 +11,17 @@ export const metadata: Metadata = { title: "Author Dashboard" };
 
 export default async function AuthorDashboardPage() {
   const session = await getSession();
-  const author = await prisma.author.findUnique({ where: { userId: session!.userId } });
-  if (!author) return null;
+
+  if (!session) {
+    redirect("/login?next=/author/dashboard");
+  }
+
+  if (session.role !== "AUTHOR") {
+    redirect("/login?next=/author/dashboard");
+  }
+
+  const author = await prisma.author.findUnique({ where: { userId: session.userId } });
+  if (!author) redirect("/login?next=/author/dashboard");
 
   const [draft, pending, approved, rejected, recent] = await Promise.all([
     prisma.blog.count({ where: { authorId: author.id, status: "DRAFT" } }),
