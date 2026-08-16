@@ -1,10 +1,6 @@
 import Link from "next/link";
-import { getSession } from "@/lib/auth";
-import LogoutButton from "./LogoutButton";
 
 export default async function Navbar() {
-  const session = await getSession();
-
   return (
     <header className="sticky top-0 z-40 border-b border-hairline bg-paper/85 backdrop-blur-md">
       <div className="container-page flex h-16 items-center justify-between">
@@ -18,11 +14,7 @@ export default async function Navbar() {
           <Link href="/search" className="hover:text-ink">Search</Link>
         </nav>
 
-        <div className="flex items-center gap-3">
-          {session && (
-            <LogoutButton />
-          )}
-        </div>
+        <div className="flex items-center gap-3" />
       </div>
     </header>
   );
