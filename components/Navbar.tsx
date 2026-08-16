@@ -19,25 +19,8 @@ export default async function Navbar() {
         </nav>
 
         <div className="flex items-center gap-3">
-          {session ? (
-            <>
-              <Link
-                href={session.role === "ADMIN" ? "/admin/dashboard" : "/author/dashboard"}
-                className="btn-primary"
-              >
-                Dashboard
-              </Link>
-              <LogoutButton />
-            </>
-          ) : (
-            <>
-              <Link href="/login" className="btn-primary">
-                Log in
-              </Link>
-              <Link href="/register" className="btn-primary">
-                Start writing
-              </Link>
-            </>
+          {session && (
+            <LogoutButton />
           )}
         </div>
       </div>
