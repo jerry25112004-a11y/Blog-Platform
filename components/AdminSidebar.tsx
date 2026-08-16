@@ -1,4 +1,5 @@
 import Link from "next/link";
+import LogoutButton from "./LogoutButton";
 
 const LINKS = [
   { href: "/admin/dashboard", label: "Dashboard" },
@@ -26,6 +27,9 @@ export default function AdminSidebar({ active }: { active: string }) {
             {link.label}
           </Link>
         ))}
+        <div className="ml-2 mt-2 md:mt-4">
+          <LogoutButton className="text-sm font-medium text-ink2 hover:text-ink" />
+        </div>
       </nav>
     </aside>
   );

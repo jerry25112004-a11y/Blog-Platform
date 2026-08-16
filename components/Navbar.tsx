@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { getSession } from "@/lib/auth";
+import LogoutButton from "./LogoutButton";
 
 export default async function Navbar() {
   const session = await getSession();
@@ -19,12 +20,15 @@ export default async function Navbar() {
 
         <div className="flex items-center gap-3">
           {session ? (
-            <Link
-              href={session.role === "ADMIN" ? "/admin/dashboard" : "/author/dashboard"}
-              className="btn-primary"
-            >
-              Dashboard
-            </Link>
+            <>
+              <Link
+                href={session.role === "ADMIN" ? "/admin/dashboard" : "/author/dashboard"}
+                className="btn-primary"
+              >
+                Dashboard
+              </Link>
+              <LogoutButton />
+            </>
           ) : (
             <>
               <Link href="/login" className="hidden text-sm font-medium text-ink2 hover:text-ink sm:inline">
