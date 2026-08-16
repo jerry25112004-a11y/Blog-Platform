@@ -26,16 +26,28 @@ export default async function AdminBlogsPage({
 
   const blogsRaw = await prisma.blog.findMany({
     where,
-    include: { category: true, author: { include: { user: { select: { name: true } } } } },
+    include: {
+      category: true,
+      author: { include: { user: { select: { name: true, email: true } } } },
+    },
     orderBy: { updatedAt: "desc" },
     take: 100,
   });
 
   const blogs = blogsRaw.map((b) => ({
-    id: b.id, title: b.title, slug: b.slug, status: b.status,
+    id: b.id,
+    title: b.title,
+    slug: b.slug,
+    status: b.status,
     updatedAt: b.updatedAt.toISOString(),
-    category: { name: b.category.name },
-    author: { user: { name: b.author.user.name } },
+    category: { name: b.category.name, slug: b.category.slug },
+    author: {
+      name: b.author.user.name,
+      email: b.author.user.email,
+      bio: b.author.bio,
+      website: b.author.website,
+      twitter: b.author.twitter,
+    },
   }));
 
   return (

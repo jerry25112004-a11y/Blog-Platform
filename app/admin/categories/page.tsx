@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { prisma } from "@/lib/db";
 import AdminSidebar from "@/components/AdminSidebar";
 import NewCategoryForm from "@/components/NewCategoryForm";
@@ -21,13 +22,13 @@ export default async function AdminCategoriesPage() {
 
         <div className="mt-6 glass-card divide-y divide-hairline">
           {categories.map((c) => (
-            <div key={c.id} className="flex items-center justify-between p-4">
+            <Link key={c.id} href={`/admin/categories/${c.slug}`} className="flex items-center justify-between p-4 transition hover:bg-ink/[0.02]">
               <div>
                 <div className="font-medium text-ink">{c.name}</div>
                 {c.description && <div className="text-xs text-ink2">{c.description}</div>}
               </div>
               <div className="text-sm text-ink2">{c._count.blogs} blogs</div>
-            </div>
+            </Link>
           ))}
         </div>
       </div>
